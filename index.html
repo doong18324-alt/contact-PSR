@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>연구개발 과제 담당자 등록</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --surface: #ffffff;
+      --primary: #1a56db;
+      --primary-hover: #1444b0;
+      --primary-light: #e8eefb;
+      --accent: #059669;
+      --accent-light: #d1fae5;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
+      --radius: 10px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #1a56db 50%, #2563eb 100%);
+      color: white;
+      padding: 2rem 1.5rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      pointer-events: none;
+    }
+
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-badge {
+      display: inline-block;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(4px);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      margin-bottom: 0.8rem;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 0.3rem;
+    }
+
+    .header p {
+      font-size: 0.82rem;
+      opacity: 0.8;
+      font-weight: 300;
+    }
+
+    .tab-nav {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      gap: 0;
+      padding: 0 1.5rem;
+      transform: translateY(-1px);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.9rem 1rem;
+      border: none;
+      background: var(--border);
+      color: var(--text-secondary);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .tab-btn:first-child { border-radius: 0 0 0 var(--radius); }
+    .tab-btn:last-child { border-radius: 0 0 var(--radius) 0; }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--primary);
+      font-weight: 600;
+      box-shadow: var(--shadow);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+    }
+
+    .tab-btn:not(.active):hover {
+      background: #edf0f4;
+      color: var(--text);
+    }
+
+    .main {
+      max-width: 900px;
+      margin: 1.5rem auto 3rem;
+      padding: 0 1.5rem;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.8rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title .icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .card-title .icon.blue { background: var(--primary-light); }
+    .card-title .icon.green { background: var(--accent-light); }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .form-group label .req {
+      color: var(--danger);
+      margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.88rem;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fafbfc;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+      background: white;
+    }
+
+    .form-group input::placeholder { color: #b0b8c9; }
+
+    .category-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .category-chip { position: relative; }
+
+    .category-chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .category-chip label {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fafbfc;
+      user-select: none;
+    }
+
+    .category-chip label:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .category-chip input:checked + label {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      font-weight: 500;
+    }
+
+    .form-actions {
+      margin-top: 1.8rem;
+      display: flex;
+      gap: 0.8rem;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 0.7rem 1.8rem;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-outline:hover { border-color: var(--text-secondary); color: var(--text); }
+
+    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.78rem; font-weight: 500; }
+
+    .btn-danger { background: var(--danger-light); color: var(--danger); border: none; }
+    .btn-danger:hover { background: var(--danger); color: white; }
+
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .search-box { position: relative; }
+
+    .search-box input {
+      padding: 0.55rem 0.85rem 0.55rem 2.2rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.82rem;
+      width: 260px;
+      background: #fafbfc;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus { outline: none; border-color: var(--primary); background: white; }
+
+    .search-box::before {
+      content: '🔍';
+      position: absolute;
+      left: 0.7rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      pointer-events: none;
+    }
+
+    .filter-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+    .filter-chip {
+      padding: 0.35rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      font-size: 0.73rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      color: var(--text-secondary);
+      user-select: none;
+    }
+
+    .filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .filter-chip.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+    .count-badge { font-size: 0.78rem; color: var(--text-secondary); }
+    .count-badge strong { color: var(--primary); font-weight: 600; }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+
+    thead th {
+      background: #f8fafc;
+      padding: 0.7rem 0.8rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    tbody td {
+      padding: 0.7rem 0.8rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover { background: #f8fafc; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .tag-주관 { background: #dbeafe; color: #1e40af; }
+    .tag-공동 { background: #d1fae5; color: #065f46; }
+    .tag-위탁 { background: #fef3c7; color: #92400e; }
+    .tag-협력 { background: #f3e8ff; color: #6b21a8; }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      padding: 0.8rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: white;
+      z-index: 1000;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { background: #059669; }
+    .toast.error { background: #dc2626; }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(2px);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-overlay.show { display: flex; }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.8rem; opacity: 0.5; }
+    .empty-state p { font-size: 0.88rem; }
+
+    .setup-warning {
+      background: #fef3c7;
+      border: 1.5px solid #fbbf24;
+      border-radius: var(--radius);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.82rem;
+      color: #92400e;
+      line-height: 1.7;
+    }
+
+    .setup-warning strong { display: block; margin-bottom: 0.3rem; font-size: 0.88rem; }
+    .setup-warning code {
+      background: rgba(0,0,0,0.08);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 640px) {
+      .header { padding: 1.5rem 1rem 1.2rem; }
+      .header h1 { font-size: 1.05rem; }
+      .tab-nav { padding: 0 1rem; }
+      .main { padding: 0 1rem; }
+      .card { padding: 1.3rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .table-controls { flex-direction: column; align-items: stretch; }
+      .search-box input { width: 100%; }
+      .form-actions { flex-direction: column; }
+      .btn { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-badge">문화체육관광부 R&D</div>
+      <h1>지능형 스포츠마일리지 기반 개인 맞춤형<br>운동추천관리 서비스 기술 개발 및 리빙랩 실증</h1>
+      <p>연구개발 과제 참여기관 담당자 등록 시스템</p>
+    </div>
+  </div>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('register')">📋 담당자 등록</button>
+    <button class="tab-btn" onclick="switchTab('list')">👥 등록 현황</button>
+  </div>
+
+  <div class="main">
+
+    <div class="setup-warning" id="setupWarning" style="display:none">
+      <strong>⚠️ Google Sheets 연동이 필요합니다</strong>
+      1. Google Sheets에 스프레드시트 생성 → 헤더 행 입력 (등록일시, 기관, 부서, 이름, 휴대폰번호, 이메일, 구분)<br>
+      2. 확장 프로그램 → Apps Script → 제공된 코드 붙여넣기<br>
+      3. 배포 → 웹 앱 → URL 복사<br>
+      4. 이 HTML 파일의 <code>SCRIPT_URL</code> 변수에 URL 입력
+    </div>
+
+    <!-- 등록 화면 -->
+    <div class="panel active" id="panelRegister">
+      <div class="card">
+        <div class="card-title">
+          <span class="icon blue">📝</span>
+          담당자 정보 등록
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>기관명 <span class="req">*</span></label>
+            <input type="text" id="fInstitution" placeholder="예: 광주보건대학교">
+          </div>
+          <div class="form-group">
+            <label>부서</label>
+            <input type="text" id="fDepartment" placeholder="예: 시니어운동처방학과">
+          </div>
+          <div class="form-group">
+            <label>담당자명 <span class="req">*</span></label>
+            <input type="text" id="fName" placeholder="이름">
+          </div>
+          <div class="form-group">
+            <label>휴대폰번호 <span class="req">*</span></label>
+            <input type="tel" id="fPhone" placeholder="010-0000-0000">
+          </div>
+          <div class="form-group full">
+            <label>이메일 <span class="req">*</span></label>
+            <input type="email" id="fEmail" placeholder="example@email.com">
+          </div>
+          <div class="form-group full">
+            <label>기관 구분 <span class="req">*</span></label>
+            <div class="category-group">
+              <div class="category-chip">
+                <input type="radio" name="category" id="cat1" value="주관연구개발기관">
+                <label for="cat1">주관연구개발기관</label>
+              </div>
+              <div class="category-chip">
+                <input type="radio" name="category" id="cat2" value="공동연구개발기관">
+                <label for="cat2">공동연구개발기관</label>
+              </div>
+              <div class="category-chip">
+                <input type="radio" name="category" id="cat3" value="위탁연구개발기관">
+                <label for="cat3">위탁연구개발기관</label>
+              </div>
+              <div class="category-chip">
+                <input type="radio" name="category" id="cat4" value="협력기관">
+                <label for="cat4">협력기관</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-outline" onclick="resetForm()">초기화</button>
+          <button class="btn btn-primary" onclick="submitForm()">등록하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 등록 현황 화면 -->
+    <div class="panel" id="panelList">
+      <div class="card">
+        <div class="card-title">
+          <span class="icon green">📊</span>
+          등록 현황
+        </div>
+
+        <div class="table-controls">
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+            <div class="search-box">
+              <input type="text" id="searchInput" placeholder="기관, 이름, 이메일 검색..." oninput="filterTable()">
+            </div>
+            <span class="count-badge">총 <strong id="totalCount">0</strong>명</span>
+          </div>
+          <div class="filter-chips">
+            <div class="filter-chip active" onclick="setFilter(this,'전체')">전체</div>
+            <div class="filter-chip" onclick="setFilter(this,'주관연구개발기관')">주관</div>
+            <div class="filter-chip" onclick="setFilter(this,'공동연구개발기관')">공동</div>
+            <div class="filter-chip" onclick="setFilter(this,'위탁연구개발기관')">위탁</div>
+            <div class="filter-chip" onclick="setFilter(this,'협력기관')">협력</div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>구분</th>
+                <th>기관</th>
+                <th>부서</th>
+                <th>이름</th>
+                <th>휴대폰</th>
+                <th>이메일</th>
+                <th>등록일</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="empty-state" id="emptyState" style="display:none">
+          <div class="icon">📭</div>
+          <p>등록된 담당자가 없습니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    // ============================================================
+    // ★ 아래 URL을 Google Apps Script 배포 URL로 교체하세요 ★
+    // ============================================================
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNo1QxkhX1RezXvnvp5HdBnt-DFR3uDoNy5qgs5lWe25NImK5JGY07jpOEvUseSX6inw/exec';
+
+    let allData = [];
+    let currentFilter = '전체';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!SCRIPT_URL) document.getElementById('setupWarning').style.display = 'block';
+      formatPhoneInput();
+    });
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => {
+        b.classList.toggle('active', (tab === 'register' && i === 0) || (tab === 'list' && i === 1));
+      });
+      document.getElementById('panelRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('panelList').classList.toggle('active', tab === 'list');
+      if (tab === 'list') loadData();
+    }
+
+    function formatPhoneInput() {
+      const el = document.getElementById('fPhone');
+      el.addEventListener('input', e => {
+        let v = e.target.value.replace(/[^0-9]/g, '');
+        if (v.length > 11) v = v.slice(0, 11);
+        if (v.length > 7) v = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7);
+        else if (v.length > 3) v = v.slice(0,3) + '-' + v.slice(3);
+        e.target.value = v;
+      });
+    }
+
+    async function submitForm() {
+      const institution = document.getElementById('fInstitution').value.trim();
+      const department = document.getElementById('fDepartment').value.trim();
+      const name = document.getElementById('fName').value.trim();
+      const phone = document.getElementById('fPhone').value.trim();
+      const email = document.getElementById('fEmail').value.trim();
+      const catEl = document.querySelector('input[name="category"]:checked');
+      const category = catEl ? catEl.value : '';
+
+      if (!institution) return showToast('기관명을 입력하세요.', 'error');
+      if (!name) return showToast('담당자명을 입력하세요.', 'error');
+      if (!phone) return showToast('휴대폰번호를 입력하세요.', 'error');
+      if (!email) return showToast('이메일을 입력하세요.', 'error');
+      if (!category) return showToast('기관 구분을 선택하세요.', 'error');
+      if (!SCRIPT_URL) return showToast('Google Apps Script URL이 설정되지 않았습니다.', 'error');
+
+      showLoading(true);
+      try {
+        const params = new URLSearchParams({ action: 'write', institution, department, name, phone, email, category });
+        const res = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+        const json = await res.json();
+        if (json.success) {
+          showToast(`${name}님이 등록되었습니다.`, 'success');
+          resetForm();
+        } else {
+          showToast('등록 실패: ' + (json.error || ''), 'error');
+        }
+      } catch (err) {
+        showToast('네트워크 오류: ' + err.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function loadData() {
+      if (!SCRIPT_URL) return;
+      showLoading(true);
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=read`);
+        const json = await res.json();
+        if (json.success) { allData = json.data; renderTable(); }
+        else showToast('데이터 로드 실패', 'error');
+      } catch (err) {
+        showToast('네트워크 오류: ' + err.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function deleteRow(row, name) {
+      if (!confirm(`${name}님의 정보를 삭제하시겠습니까?`)) return;
+      showLoading(true);
+      try {
+        const params = new URLSearchParams({ action: 'delete', row: row.toString() });
+        const res = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+        const json = await res.json();
+        if (json.success) { showToast('삭제되었습니다.', 'success'); loadData(); }
+        else showToast('삭제 실패', 'error');
+      } catch (err) {
+        showToast('네트워크 오류', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function renderTable() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const tbody = document.getElementById('tableBody');
+      const empty = document.getElementById('emptyState');
+
+      let filtered = allData.filter(d => {
+        if (currentFilter !== '전체' && d['구분'] !== currentFilter) return false;
+        if (search) {
+          const hay = `${d['기관']} ${d['이름']} ${d['이메일']} ${d['부서']}`.toLowerCase();
+          if (!hay.includes(search)) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('totalCount').textContent = filtered.length;
+
+      if (!filtered.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+
+      tbody.innerHTML = filtered.map((d, i) => {
+        const tagClass = d['구분'].includes('주관') ? 'tag-주관' :
+                         d['구분'].includes('공동') ? 'tag-공동' :
+                         d['구분'].includes('위탁') ? 'tag-위탁' : 'tag-협력';
+        const shortCat = d['구분'].replace('연구개발기관','').replace('기관','');
+        const dateStr = d['등록일시'] ? String(d['등록일시']).slice(0, 10) : '-';
+        return `<tr>
+          <td style="color:var(--text-secondary);font-size:0.78rem">${i+1}</td>
+          <td><span class="tag ${tagClass}">${shortCat}</span></td>
+          <td style="font-weight:500">${d['기관']||'-'}</td>
+          <td>${d['부서']||'-'}</td>
+          <td style="font-weight:500">${d['이름']||'-'}</td>
+          <td style="font-size:0.8rem">${d['휴대폰번호']||'-'}</td>
+          <td style="font-size:0.8rem">${d['이메일']||'-'}</td>
+          <td style="font-size:0.78rem;color:var(--text-secondary)">${dateStr}</td>
+          <td><button class="btn btn-sm btn-danger" onclick="deleteRow(${d['_row']},'${d['이름']}')">삭제</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function setFilter(el, filter) {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      currentFilter = filter;
+      renderTable();
+    }
+
+    function filterTable() { renderTable(); }
+
+    function resetForm() {
+      ['fInstitution','fDepartment','fName','fPhone','fEmail'].forEach(id => document.getElementById(id).value = '');
+      const c = document.querySelector('input[name="category"]:checked');
+      if (c) c.checked = false;
+    }
+
+    function showToast(msg, type='success') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `toast ${type} show`;
+      setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    function showLoading(on) {
+      document.getElementById('loading').classList.toggle('show', on);
+    }
+  </script>
+</body>
+</html>
